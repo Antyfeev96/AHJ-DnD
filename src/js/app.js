@@ -1,4 +1,4 @@
-import AppCreator from './appCreator';
+// import AppCreator from './appCreator';
 
-const app = new AppCreator();
-app.init();
+// const app = new AppCreator();
+// app.init();
