@@ -17,6 +17,8 @@ export default class AppCreator {
     this.container.addEventListener('click', (event) => this.onDeleteTask(event));
     this.container.addEventListener('mouseover', (event) => this.onMouseOver(event));
     this.container.addEventListener('mouseout', (event) => this.onMouseOut(event));
+    this.container.addEventListener('mousedown', (event) => this.onMouseDown(event));
+    this.container.addEventListener('mouseup', (event) => this.onMouseUp(event));
   }
 
   onAddTask(event) {
@@ -63,5 +65,24 @@ export default class AppCreator {
     if (event.target.classList.contains('item__delete')) {
       event.target.closest('.item').remove();
     }
+  }
+
+  onMouseDown(event) {
+    event.preventDefault();
+    const item = event.target.closest('.item');
+    if (item) {
+      // // const draggedEl = item;
+      // const ghostEl = event.target.cloneNode(true);
+      // ghostEl.classList.add('dragged');
+      // this.container.appendChild(ghostEl);
+      // ghostEl.style.left = `${event.pageX - ghostEl.offsetWidth / 2}px`;
+      // ghostEl.style.top = `${event.pageY - ghostEl.offsetHeight / 2}px`;
+      // document.body.style.cursor = 'grabbing';
+    }
+  }
+
+  onMouseUp(event) {
+    event.preventDefault();
+    console.log(event.target);
   }
 }
