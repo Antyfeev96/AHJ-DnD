@@ -1,9 +1,12 @@
+/* eslint-disable no-debugger */
+/* eslint-disable consistent-return */
 /* eslint-disable class-methods-use-this */
 export default class AppCreator {
   constructor(layout) {
     this.layout = layout;
     this.item = this.parserHTML(this.layout.item).querySelector('.item');
     this.footer = this.parserHTML(this.layout.footer).querySelector('.column__footer');
+    this.currentItem = null;
   }
 
   parserHTML(string) {
@@ -14,7 +17,6 @@ export default class AppCreator {
     document.body.innerHTML = this.layout.html;
     this.container = document.querySelector('.container');
     this.container.addEventListener('click', (event) => this.onAddTask(event));
-    this.container.addEventListener('click', (event) => this.onDeleteTask(event));
     this.container.addEventListener('mouseover', (event) => this.onMouseOver(event));
     this.container.addEventListener('mouseout', (event) => this.onMouseOut(event));
     this.container.addEventListener('mousedown', (event) => this.onMouseDown(event));
@@ -67,22 +69,63 @@ export default class AppCreator {
     }
   }
 
+  drag(e) {
+    this.currentItem = document.querySelector('.dragged');
+    this.currentItem.style.cursor = 'grabbing';
+    if (this.currentItem === null) return false;
+    this.currentItem.style.position = 'absolute';
+    this.currentItem.style.left = `${e.clientX - 20}px`;
+    this.currentItem.style.top = `${e.clientY - 20}px`;
+  }
+
+  dragEnd() {
+    if (this.querySelector('.dragged') === null) return false;
+    this.querySelector('.dragged').classList.remove('dragged');
+    this.removeEventListener('mousemove', () => this.drag);
+    this.removeEventListener('mouseup', () => this.dragEnd);
+  }
+
+  itemDragEnd(e) {
+    const draggedItem = document.querySelector('.dragged');
+    if (draggedItem === null) {
+      return;
+    }
+    const thisContent = this.querySelector('.column__content');
+    if (thisContent.querySelector('.item') === null) {
+      thisContent.append(draggedItem);
+    } else {
+      thisContent.insertBefore(draggedItem, e.target.closest('.item'));
+    }
+    draggedItem.style = '';
+  }
+
   onMouseDown(event) {
+    if (event.target.classList.contains('add-area__text')) {
+      return;
+    }
+    if (event.target.classList.contains('column__footer')) {
+      this.container.addEventListener('click', (e) => this.onDeleteTask(e));
+      return;
+    }
+    if (event.target.classList.contains('item__delete')) {
+      event.target.closest('.item').remove();
+      return;
+    }
     event.preventDefault();
-    const item = event.target.closest('.item');
-    if (item) {
-      // // const draggedEl = item;
-      // const ghostEl = event.target.cloneNode(true);
-      // ghostEl.classList.add('dragged');
-      // this.container.appendChild(ghostEl);
-      // ghostEl.style.left = `${event.pageX - ghostEl.offsetWidth / 2}px`;
-      // ghostEl.style.top = `${event.pageY - ghostEl.offsetHeight / 2}px`;
-      // document.body.style.cursor = 'grabbing';
+    this.currentItem = event.target.closest('.item');
+    if (this.currentItem) {
+      this.currentItem.classList.add('dragged');
+      this.currentItem = event.target.closest('.dragged');
+      this.currentItem.style.cursor = 'grabbing';
+      this.container.addEventListener('mouseup', this.dragEnd);
+      this.container.addEventListener('mousemove', this.drag);
+      [...document.querySelectorAll('.column')].forEach((item) => {
+        item.addEventListener('mouseup', this.itemDragEnd);
+      });
     }
   }
 
   onMouseUp(event) {
     event.preventDefault();
-    console.log(event.target);
   }
 }
